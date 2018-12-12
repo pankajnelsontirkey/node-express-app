@@ -5,6 +5,8 @@ const bodyParser = require('body-parser');
 const expressValidator = require('express-validator');
 const flash = require('connect-flash');
 const session = require('express-session');
+const passport = require('passport');
+const config = require('./config/db');
 
 mongoose.connect('mongodb://localhost/nodekb');
 let db = mongoose.connection;
@@ -24,6 +26,7 @@ const app = express();
 
 /* Load Models */
 let Article = require('./models/article');
+let User = require('./models/user');
 
 /* Load View Engine */
 app.set('views', path.join(__dirname, 'views'));
@@ -75,23 +78,39 @@ app.use(
 	})
 );
 
+// Passport Config
+require('./config/passport')(passport);
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.get('*', (req, res, next) => {
+	res.locals.user = req.user || null;
+	next();
+});
+
 /* Home Route */
 app.get('/', (req, res) => {
 	Article.find({}, (err, articles) => {
 		if (err) {
 			console.log(err);
 		} else {
-			res.render('index', {
-				title: 'Articles',
-				articles: articles
+			User.find({}, (err, users) => {
+				res.render('index', {
+					title: 'Articles',
+					articles: articles,
+					users: users
+				});
 			});
 		}
 	});
 });
 
 /* Route Files */
-let articles = require('./routes/article');
+let articles = require('./routes/articles');
+let users = require('./routes/users');
+
 app.use('/articles', articles);
+app.use('/users', users);
 
 /* Start Server */
 app.listen(3000, () => {
