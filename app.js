@@ -13,12 +13,12 @@ let db = mongoose.connection;
 
 /* Check connection */
 db.once('open', () => {
-	console.log('Connected to MongoDB');
+  console.log('Connected to MongoDB');
 });
 
 /* Check DB Errors */
-db.on('error', err => {
-	console.log(err);
+db.on('error', (err) => {
+  console.log(err);
 });
 
 /* Init App */
@@ -43,39 +43,39 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 /* Express Session Middleware */
 app.use(
-	session({
-		secret: 'keyboard cat',
-		resave: true,
-		saveUninitialized: true
-		// cookie: { secure: true }
-	})
+  session({
+    secret: 'keyboard cat',
+    resave: true,
+    saveUninitialized: true
+    // cookie: { secure: true }
+  })
 );
 
 /* Express Message Middleware */
 app.use(require('connect-flash')());
-app.use(function(req, res, next) {
-	res.locals.messages = require('express-messages')(req, res);
-	next();
+app.use(function (req, res, next) {
+  res.locals.messages = require('express-messages')(req, res);
+  next();
 });
 
 /* Express Validator Middleware */
 app.use(
-	expressValidator({
-		errorFormatter: (param, msg, value) => {
-			let namespace = param.split('.'),
-				root = namespace.shift(),
-				formParam = root;
+  expressValidator({
+    errorFormatter: (param, msg, value) => {
+      let namespace = param.split('.'),
+        root = namespace.shift(),
+        formParam = root;
 
-			while (namespace.length) {
-				formParam += '[' + namespace.shift() + ']';
-			}
-			return {
-				param: formParam,
-				msg: msg,
-				value: value
-			};
-		}
-	})
+      while (namespace.length) {
+        formParam += '[' + namespace.shift() + ']';
+      }
+      return {
+        param: formParam,
+        msg: msg,
+        value: value
+      };
+    }
+  })
 );
 
 // Passport Config
@@ -84,25 +84,25 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.get('*', (req, res, next) => {
-	res.locals.user = req.user || null;
-	next();
+  res.locals.user = req.user || null;
+  next();
 });
 
 /* Home Route */
 app.get('/', (req, res) => {
-	Article.find({}, (err, articles) => {
-		if (err) {
-			console.log(err);
-		} else {
-			User.find({}, (err, users) => {
-				res.render('index', {
-					title: 'Articles',
-					articles: articles,
-					users: users
-				});
-			});
-		}
-	});
+  Article.find({}, (err, articles) => {
+    if (err) {
+      console.log(err);
+    } else {
+      User.find({}, (err, users) => {
+        res.render('index', {
+          title: 'Articles',
+          articles: articles,
+          users: users
+        });
+      });
+    }
+  });
 });
 
 /* Route Files */
@@ -114,5 +114,5 @@ app.use('/users', users);
 
 /* Start Server */
 app.listen(3000, () => {
-	console.log('Server running on port 3000...');
+  console.log('Server running on port 3000...');
 });
